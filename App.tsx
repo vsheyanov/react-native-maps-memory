@@ -1,118 +1,83 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import './gesture-handler';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, {  useEffect } from 'react';
+import { Button, FlatList, Image, SafeAreaView, StyleSheet, Text } from 'react-native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import { ScrollView } from 'react-native-gesture-handler';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function App({ navigation }): React.JSX.Element {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView>
+      <FlatList
+        data={new Array(100).fill(0).map((_, index) => index)}
+        renderItem={(value) => (
+          <Button title={`Item ${value.item}`} onPress={() => navigation.navigate('MemoryLeak', { value: value.item })} />
+        )}/>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  map: {
+    ...StyleSheet.absoluteFillObject,
+    marginTop: 60,
   },
 });
 
-export default App;
+const Map = ({ route, navigation }) => {
+  useEffect(() => {
+    console.log('Map mount');
+    return () => {
+      console.log('Map unmount');
+    };
+  }, []);
+
+  return (
+    <>
+      <Button title="Reset stack" onPress={() => navigation.reset({ routes: [{ name: 'Home'}]})} />
+      <Text>{route.params.value}</Text>
+      <MapView
+        provider={PROVIDER_GOOGLE}
+        style={styles.map}
+        region={{
+          latitude: 37.78825,
+          longitude: -122.4324,
+          latitudeDelta: 0.015,
+          longitudeDelta: 0.0121,
+        }}/>
+    </>
+  );
+};
+
+const ImageList = () => (
+  <ScrollView>
+    {
+      new Array(1000).fill(0).map((_, index) => (
+        <Image
+          key={index}
+          source={{ uri: `https://picsum.photos/200/300?random=${Math.round(Math.random() * 1000)}` }}
+          style={{ width: 300, height: 400}} />
+      ))
+    }
+  </ScrollView>
+);
+
+
+const Stack = createStackNavigator();
+
+const renderMap = true;
+
+const MainApp = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={App} />
+        <Stack.Screen name="MemoryLeak" component={renderMap ? Map : ImageList} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export default MainApp;
