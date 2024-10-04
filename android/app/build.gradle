@@ -72,14 +72,6 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
-def loadProperties = { filename ->
-    def properties = new Properties()
-    file(filename).withInputStream {
-        properties.load(it)
-    }
-    return properties
-}
-
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -92,7 +84,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        manifestPlaceholders.geoKEY = loadProperties("../../.env").getProperty("geoKEY")
     }
     signingConfigs {
         debug {
