@@ -77,7 +77,6 @@ def loadProperties = { filename ->
     file(filename).withInputStream {
         properties.load(it)
     }
-    println(properties.getProperty("geoKEY"))
     return properties
 }
 
